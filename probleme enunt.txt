@@ -1,0 +1,5 @@
+Chiar daca au fost abordate in forum, acestea sunt probleme generale si majore care ar fi trebuit actualizate direct in enunt pe OCW.
+
+nu se specifica ca toti utilizatorii incep cu 15 filme (ceea ce e o prostie) dar doar la cei premium se considera
+nu se spune ca in args sunt scrise input-urile si outputurile
+nu se specifica multe outputuri care trebuie puse (cum ar fi watch, like, purchase. astea sunt doar cateva din MUUUUULTELE erori)
