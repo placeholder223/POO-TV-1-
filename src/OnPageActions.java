@@ -1,111 +1,98 @@
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import databases.MovieDatabase;
+import databases.UserDatabase;
+import error.handling.Errors;
+import resources.primary.Action;
+import resources.primary.Movie;
+import resources.primary.Pages;
+import resources.primary.SubPages;
+import resources.primary.User;
 
 import java.util.ArrayList;
 
-public class OnPageActions {
-
-   private boolean needsChange;
-   private SubPages currPage;
-   private User currUser;
-
-   private ArrayList<Movie> currMovies;
+public final class OnPageActions {
+   public static final int MAXIMUM_RATE = 5;
+   private static boolean needsChange;
+   private static SubPages currPage;
+   private static User currUser;
    private static String detailedMovie;
 
-   public static void setDetailedMovie(String detailedMovie) {
+   /**
+    * it sets the movie for which "see details" was accessed
+    * this is needed because while on that page, the use can purchase/watch/like/rate without
+    * specifying the movie, so the program needs to know what to byt
+    */
+   public static void setDetailedMovie(final String detailedMovie) {
       OnPageActions.detailedMovie = detailedMovie;
    }
 
-   public OnPageActions() {
+   /**
+    * default constructor
+    */
+   private OnPageActions() {
 
    }
 
-   public void onPageActions(ObjectNode temp, Action action, User currentUser,
-                             SubPages currentPage, Pages pages, boolean isAuthenticated,
-                             UserDatabase userDatabase, MovieDatabase movieDatabase) {
-      this.currUser = currentUser;
-      this.currPage = currentPage;
-      this.needsChange = false;
-      Errors errors = new Errors();
+   /**
+    * does the appropriate on_page action based on the action name
+    */
+   public static void onPageActions(final ObjectNode temp, final Action action,
+                                    final User currentUser, final SubPages currentPage,
+                                    final Pages pages, final UserDatabase userDatabase,
+                                    final MovieDatabase movieDatabase) {
+      currUser = currentUser;
+      currPage = currentPage;
+      needsChange = false;
       switch (action.getFeature()) {
-         case "login" -> {
+         case Pages.LOGIN -> {
             String name = action.getCredentials().getName();
             String password = action.getCredentials().getPassword();
             if (userDatabase.isLoginValid(name, password)) {
-               this.currUser = userDatabase.retrieveUser(name, password);
-               this.currPage = pages.getHomepage(true);
-               ArrayList<Movie> auxEmptyList = new ArrayList<>();
-
-               User copyCurrentUser = new User(currUser);
-
-               needsChange = errors.errorOutput(null, auxEmptyList, copyCurrentUser, temp);
+               currUser = userDatabase.retrieveUser(name);
+               currPage = pages.getHomepage(true);
+               needsChange = Errors.errorOutput(null, null, currUser, temp);
                movieDatabase.getAvailableMovies(currUser);
-
-            } else {
-               this.currPage = pages.getHomepage(false);
-
-
-               ArrayList<Movie> auxEmptyList = new ArrayList<>();
-               User copyCurrentUser = null;
-               needsChange = errors.errorOutput(Errors.ERROR, auxEmptyList, copyCurrentUser, temp);
+               break;
             }
+            currPage = pages.getHomepage(false);
+            needsChange = Errors.errorOutput(Errors.ERROR, null, null, temp);
          }
-         case "register" -> {
-            User newUser = new User(action.getCredentials());
-            userDatabase.addUserToHash(newUser);
-
-            ArrayList<Movie> auxEmptyList = new ArrayList<>();
-            User copyCurrentUser = new User(newUser);
-
-            needsChange = errors.errorOutput(null, auxEmptyList, copyCurrentUser, temp);
-            this.currPage = pages.getHomepage(true);
-            this.currUser = newUser;
-            userDatabase.addUser(newUser);
-            movieDatabase.getAvailableMovies(newUser);
+         case Pages.REGISTER -> {
+            currUser = new User(action.getCredentials());
+            userDatabase.addUserToHash(currUser);
+            needsChange = Errors.errorOutput(null, null, currUser, temp);
+            currPage = pages.getHomepage(true);
+            movieDatabase.getAvailableMovies(currUser);
          }
-         case "buy premium account" -> {
-            int tokens = currentUser.getTokensCount();
-            if (tokens < User.NUMBER_TOKENS_FOR_PREMIUM
+         case Pages.BUY_PREMIUM_ACCOUNT -> {
+            if (currentUser.getTokensCount() < User.NUMBER_TOKENS_FOR_PREMIUM
                   || currentUser.getCredentials().getAccountType().equals(User.PREMIUM_STATUS)) {
-
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               for (Movie movie : movieDatabase.getCurrentMovies()) {
-                  copyMovies.add(new Movie(movie));
-               }
-               User copyCurrentUser = new User(currentUser);
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser, temp);
-
+               needsChange = Errors.errorOutput(Errors.ERROR, null,
+                     currentUser, temp);
                break;
             }
             currentUser.addToTokensCount(-User.NUMBER_TOKENS_FOR_PREMIUM);
             currentUser.getCredentials().setAccountType(User.PREMIUM_STATUS);
-
          }
-         case "buy tokens" -> {
+         case Pages.BUY_TOKENS -> {
             int balance = Integer.parseInt(currentUser.getCredentials().getBalance());
             int boughtCount = Integer.parseInt(action.getCount());
             if (balance < boughtCount) {
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               for (Movie movie : movieDatabase.getCurrentMovies()) {
-                  copyMovies.add(new Movie(movie));
-               }
-               User copyCurrentUser = new User(currentUser);
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser, temp);
+               needsChange = Errors.errorOutput(Errors.ERROR, null,
+                     currentUser, temp);
                break;
             }
             balance -= boughtCount;
             currentUser.getCredentials().setBalance(Integer.toString(balance));
             currentUser.addToTokensCount(Integer.parseInt(action.getCount()));
          }
-         case "search" -> {
+         case Pages.SEARCH -> {
             ArrayList<Movie> searchedMovies = movieDatabase.search(action.getStartsWith());
-            User copyCurrentUser = new User(currentUser);
-            needsChange = errors.errorOutput(null, searchedMovies,
-                  copyCurrentUser, temp);
+            needsChange = Errors.errorOutput(null, searchedMovies,
+                  currentUser, temp);
          }
 
-         case "filter" -> {
+         case Pages.FILTER -> {
             movieDatabase.getAvailableMovies(currentUser);
             if (action.getFilters().getContains() != null) {
                movieDatabase.contains(action.getFilters().getContains());
@@ -114,35 +101,25 @@ public class OnPageActions {
                movieDatabase.filter(action.getFilters().getSort().getDuration(),
                      action.getFilters().getSort().getRating());
             }
-            User copyCurrentUser = new User(currentUser);
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            for (Movie movie : movieDatabase.getCurrentMovies()) {
-               copyMovies.add(new Movie(movie));
-            }
-            needsChange = errors.errorOutput(null, copyMovies,
-                  copyCurrentUser, temp);
+            needsChange = Errors.errorOutput(null, movieDatabase.getCurrentMovies(),
+                  currentUser, temp);
          }
-         case "purchase" -> {
+         case Pages.PURCHASE -> {
             Movie wantedMovie;
-            if (action.getMovie() != null) {
+            if (action.getMovie() != null) { // this if is because you can buy a movie on the
+               // upgrades tab, by specfying the name
                wantedMovie = movieDatabase.get(action.getMovie());
-            } else {
+            } else { // but you don't need to specify the name if on the page see_details
                wantedMovie = movieDatabase.get(detailedMovie);
             }
             if (wantedMovie == null || !movieDatabase.getCurrentMovies().contains(wantedMovie)) {
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               for (Movie movie : movieDatabase.getCurrentMovies()) {
-                  copyMovies.add(new Movie(movie));
-               }
-               User copyCurrentUser = new User(currentUser);
-
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser, temp);
+               // if the wanted movie doesn't exist
+               needsChange = Errors.errorOutput(Errors.ERROR, null, currentUser, temp);
                break;
             }
-
-
             if (!currentUser.getCredentials().getAccountType().equals(User.PREMIUM_STATUS)) {
+               // very dumb thing, all users start with 15 free movies, but for the standard
+               // account they don't count. Why is this?
                currentUser.addToNumFreeMovies(-User.STARTING_FREE_MOVIES);
             }
             boolean hasUsedFreeMovie = false;
@@ -152,119 +129,84 @@ public class OnPageActions {
                hasUsedFreeMovie = true;
             }
             if (!currentUser.getCredentials().getAccountType().equals(User.PREMIUM_STATUS)) {
+               // put the back the movies so the output is right
                currentUser.addToNumFreeMovies(User.STARTING_FREE_MOVIES);
             }
             if (hasUsedFreeMovie) {
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               copyMovies.add(new Movie(wantedMovie));
-               User copyCurrentUser = new User(currentUser);
-               needsChange = errors.errorOutput(null, copyMovies, copyCurrentUser, temp);
+               needsChange = Errors.errorOutput(null, Errors.toList(wantedMovie), currentUser,
+                     temp);
                break;
             }
             if (currentUser.getTokensCount() >= Movie.NUM_TOKENS_FOR_BUYING) {
+               // check if the user has enough tokens
                currentUser.addToTokensCount(-Movie.NUM_TOKENS_FOR_BUYING);
                currentUser.getPurchasedMovies().add(wantedMovie);
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               copyMovies.add(new Movie(wantedMovie));
-               User copyCurrentUser = new User(currentUser);
-               needsChange = errors.errorOutput(null, copyMovies, copyCurrentUser, temp);
-            } else {
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               for (Movie movie : movieDatabase.getCurrentMovies()) {
-                  copyMovies.add(new Movie(movie));
-               }
-               User copyCurrentUser = new User(currentUser);
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser, temp);
+               needsChange = Errors.errorOutput(null, Errors.toList(wantedMovie), currentUser,
+                     temp);
+               break;
             }
+            needsChange = Errors.errorOutput(Errors.ERROR, movieDatabase.getCurrentMovies(),
+                  currentUser, temp);
          }
-         case "watch" -> {
-            Movie wantedMovie;
-            if (action.getMovie() != null) {
-               wantedMovie = movieDatabase.get(action.getMovie());
-            } else {
-               wantedMovie = movieDatabase.get(detailedMovie);
-            }
+         case Pages.WATCH -> {
+            Movie wantedMovie = movieDatabase.get(detailedMovie);
             if (wantedMovie == null || !currentUser.getPurchasedMovies().contains(wantedMovie)) {
-
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               User copyCurrentUser = null;
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser,
-                     temp);
+               needsChange = Errors.errorOutput(Errors.ERROR, null, null, temp);
                break;
             }
-
-
             currentUser.getWatchedMovies().add(wantedMovie);
-
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            copyMovies.add(new Movie(wantedMovie));
-            User copyCurrentUser = new User(currentUser);
-            needsChange = errors.errorOutput(null, copyMovies, copyCurrentUser, temp);
+            needsChange = Errors.errorOutput(null, Errors.toList(wantedMovie), currentUser,
+                  temp);
          }
-         case "like" -> {
+         case Pages.LIKE -> {
+            Movie wantedMovie = movieDatabase.get(detailedMovie);
+            if (wantedMovie == null || !currentUser.getWatchedMovies().contains(wantedMovie)) {
+               needsChange = Errors.errorOutput(Errors.ERROR, null, null, temp);
+               break;
+            }
+            currentUser.addToLikedMovies(wantedMovie);
+            needsChange = Errors.errorOutput(null, Errors.toList(wantedMovie), currentUser,
+                  temp);
+         }
+         case Pages.RATE -> {
             Movie wantedMovie;
             if (action.getMovie() != null) {
                wantedMovie = movieDatabase.get(action.getMovie());
             } else {
                wantedMovie = movieDatabase.get(detailedMovie);
             }
-            if (wantedMovie == null || !currUser.getWatchedMovies().contains(wantedMovie)) {
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               User copyCurrentUser = null;
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser,
-                     temp);
+            if (wantedMovie == null || !currentUser.getWatchedMovies().contains(wantedMovie)
+                  || action.getRate() > MAXIMUM_RATE || action.getRate() < 0) {
+               needsChange = Errors.errorOutput(Errors.ERROR, null, null, temp);
                break;
             }
-            currUser.getLikedMovies().add(wantedMovie);
-            wantedMovie.addToNumLikes(1);
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            copyMovies.add(new Movie(wantedMovie));
-            User copyCurrentUser = new User(currentUser);
-            needsChange = errors.errorOutput(null, copyMovies, copyCurrentUser, temp);
-         }
-         case "rate" -> {
-            Movie wantedMovie;
-            if (action.getMovie() != null) {
-               wantedMovie = movieDatabase.get(action.getMovie());
-            } else {
-               wantedMovie = movieDatabase.get(detailedMovie);
-            }
-            if (wantedMovie == null || !currUser.getWatchedMovies().contains(wantedMovie)
-                  || action.getRate() > 5 || action.getRate() < 0) {
-               ArrayList<Movie> copyMovies = new ArrayList<>();
-               User copyCurrentUser = null;
-               needsChange = errors.errorOutput(Errors.ERROR, copyMovies, copyCurrentUser,
-                     temp);
-               break;
-            }
-
-
-            currentUser.getRatedMovies().add(wantedMovie);
-            wantedMovie.addRating(currentUser, action.getRate());
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            copyMovies.add(new Movie(wantedMovie));
-            User copyCurrentUser = new User(currentUser);
-            needsChange = errors.errorOutput(null, copyMovies, copyCurrentUser, temp);
-
-
+            currentUser.addToRatedMovies(wantedMovie, action.getRate());
+            needsChange = Errors.errorOutput(null, Errors.toList(wantedMovie), currentUser,
+                  temp);
          }
          default -> {
-            System.out.println("hatz");
          }
       }
    }
 
-   public boolean getNeedsChange() {
+   /**
+    * returns the needsChange value, which tells whether or not the output needs to be updated
+    */
+   public static boolean getNeedsChange() {
       return needsChange;
    }
 
-   public SubPages getCurrPage() {
+   /**
+    * returns the current page if it is changed (only for login and register)
+    */
+   public static SubPages getCurrPage() {
       return currPage;
    }
 
-   public User getCurrUser() {
+   /**
+    * returns the current user if it is changed (again, only for login and register)
+    */
+   public static User getCurrUser() {
       return currUser;
    }
 }

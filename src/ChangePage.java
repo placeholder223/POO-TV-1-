@@ -1,79 +1,93 @@
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import databases.MovieDatabase;
+import error.handling.Errors;
+import resources.primary.Action;
+import resources.primary.Movie;
+import resources.primary.Pages;
+import resources.primary.SubPages;
+import resources.primary.User;
+public final class ChangePage {
+   //these 3 fields act as return values basically
+   private static SubPages actualPage;
+   private static boolean needsChange;
+   private static User currUser;
 
-import java.util.ArrayList;
-
-public class ChangePage {
-   //use getter of actualPage as a second needsChange =
-   private SubPages actualPage;
-   private boolean needsChange;
-   private User currUser;
    /**
     * initializer
     */
-   public ChangePage() {
+   private ChangePage() {
 
    }
 
    /**
-    * if the page is one other than movies, see details or logout, it just changes the page
-    *
-    * @needsChange = it needsChange =s whether or not there needs to be any change in the json
+    * if the page is one other than movies, see details or logout, it just changes the page,
+    * through "actualPage"
+    * needsChange changes depending on whether or not there needs to be any change in the json
+    * currUser is changed only on logout
     */
-   public void changePageActions(final ObjectNode temp,final  Action action,
-                                    final User currentUser, final SubPages currentPage,
-                                    final Pages pages,final MovieDatabase movieDatabase,
-                                    final SubPages tempPage) {
-      User copyUser = new User(currentUser);
-      Errors errors = new Errors();
-      this.needsChange = false;
-      this.currUser = currentUser;
-      if (!action.getPage().equals("see details"))
+   public static void changePageActions(final ObjectNode temp, final Action action,
+                                        final User currentUser, final SubPages currentPage,
+                                        final Pages pages, final MovieDatabase movieDatabase,
+                                        final SubPages tempPage) {
+      needsChange = false; // we assume no change is needed, this changes however for the
+                                // movies and see details page
+      currUser = currentUser; // the current user only channges on the logout pag
+      if (!action.getPage().equals("see details")) {
+         // this for the purchase, watch, like and rate on_page functions
+         // since after entering the "see details" page of a movie, they can do those actions
+         // without explicitly saying the movie's name
          OnPageActions.setDetailedMovie(null);
+      }
       switch (action.getPage()) {
-         case "movies" -> {
-            this.actualPage = tempPage;
+         case Pages.MOVIES -> {
+            actualPage = tempPage;
             movieDatabase.getAvailableMovies(currentUser);
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            for (Movie movie : movieDatabase.getCurrentMovies()) {
-               copyMovies.add(new Movie(movie));
-            }
-            this.needsChange = errors.errorOutput(null, copyMovies, copyUser, temp);
+            needsChange = Errors.errorOutput(null, movieDatabase.getCurrentMovies(),
+                  currentUser, temp);
          }
-         case "see details" -> {
+         case Pages.SEE_DETAILS -> {
             for (Movie movie : movieDatabase.getCurrentMovies()) {
                if (movie.getName().equals(action.getMovie())) {
-                  this.actualPage = tempPage;
-                  ArrayList<Movie> copyMovies = new ArrayList<>();
-                  copyMovies.add(new Movie(movie));
+                  actualPage = tempPage;
                   OnPageActions.setDetailedMovie(action.getMovie());
-                  this.needsChange = errors.errorOutput(null, copyMovies, copyUser, temp);
+                  needsChange = Errors.errorOutput(null, Errors.toList(movie), currentUser, temp);
                   break;
                }
             }
-            if(needsChange)
+            if (needsChange) { // there was an error so no more continuation of the function
                break;
-            this.actualPage = currentPage;
-            ArrayList<Movie> copyMovies = new ArrayList<>();
-            this.needsChange = errors.errorOutput(Errors.ERROR, copyMovies, null, temp);
+            }
+            actualPage = currentPage;
+            needsChange = Errors.errorOutput(Errors.ERROR, null, null, temp);
          }
-         case "logout" -> {
-            this.actualPage = pages.getHomepage(false);
-            this.currUser = null;
+         case Pages.LOGOUT -> {
+            actualPage = pages.getHomepage(false);
+            currUser = null;
          }
          default -> {
-            this.actualPage = tempPage;
+            actualPage = tempPage;
          }
       }
    }
 
-   public SubPages getActualPage() {
+   /**
+    * @return the page after the change page command was used (even if invalid for see_details )
+    */
+   public static SubPages getActualPage() {
       return actualPage;
    }
-   public boolean getNeedsChange(){
+
+   /**
+    * @return if the output needs to be updated
+    */
+   public static boolean getNeedsChange() {
       return needsChange;
    }
 
-   public User getCurrUser() {
+   /**
+    * @return the user after the command was used (it is only changed for logout)
+    */
+   public static User getCurrUser() {
       return currUser;
    }
 }

@@ -10,8 +10,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Ireland"
+      "country" : "Ireland",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -40,8 +40,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "standard",
-      "balance" : "50",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "50"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,

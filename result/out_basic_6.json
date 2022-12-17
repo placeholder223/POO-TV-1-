@@ -10,8 +10,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Ireland"
+      "country" : "Ireland",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -56,8 +56,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Ireland"
+      "country" : "Ireland",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -74,8 +74,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Ireland"
+      "country" : "Ireland",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -112,8 +112,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Ireland"
+      "country" : "Ireland",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -134,8 +134,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "standard",
-      "balance" : "200",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "200"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -172,8 +172,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 15,
@@ -208,8 +208,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 15,
@@ -236,8 +236,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 14,
@@ -274,8 +274,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 14,
@@ -322,8 +322,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 14,
@@ -390,8 +390,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 14,
@@ -448,8 +448,8 @@
       "name" : "Eduard",
       "password" : "secret",
       "accountType" : "premium",
-      "balance" : "150",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "150"
     },
     "tokensCount" : 40,
     "numFreePremiumMovies" : 14,

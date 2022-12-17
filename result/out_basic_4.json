@@ -6,8 +6,8 @@
       "name" : "Ramsi",
       "password" : "numiplacevelea",
       "accountType" : "standard",
-      "balance" : "300",
-      "country" : "Romania"
+      "country" : "Romania",
+      "balance" : "300"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -28,8 +28,8 @@
       "name" : "Mihail",
       "password" : "discret",
       "accountType" : "premium",
-      "balance" : "1337",
-      "country" : "Russia"
+      "country" : "Russia",
+      "balance" : "1337"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -46,8 +46,8 @@
       "name" : "Mihail",
       "password" : "discret",
       "accountType" : "premium",
-      "balance" : "1337",
-      "country" : "Russia"
+      "country" : "Russia",
+      "balance" : "1337"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
@@ -64,8 +64,8 @@
       "name" : "Mihail",
       "password" : "discret",
       "accountType" : "premium",
-      "balance" : "1337",
-      "country" : "Russia"
+      "country" : "Russia",
+      "balance" : "1337"
     },
     "tokensCount" : 0,
     "numFreePremiumMovies" : 15,
